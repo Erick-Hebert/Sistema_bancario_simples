@@ -57,28 +57,30 @@ def Cadastra_conta(numero_conta, agencia):
     return numero_conta
 
 def Listar_usuarios():
-    print('-'*30);
+    Titulo('Usuários Cadastrados');
     for usuario in usuarios:
         print(f'Nome: {usuario['nome']}\nData de nascimento: {usuario['data_nascimento']}\nCpf: {usuario['cpf']}\nendereço: {usuario['endereco']}\n{'-'*30}');
 
-
 def Listar_contas():
-    print('-'*30);
+    Titulo('Contas Cadastradas');
     for conta in contas:
         print(f'Cpf: {conta['cpf']}\nNumero de conta: {conta['numero_conta']}\nAgência: {conta['agencia']}\n{'-'*30}');
 
 def Menu():
-    print('''\n
-      ---------------MENU--------------
-        1 - Depositar
-        2 - Saque
-        3 - Extrato
-        4 - Cadastrar Usuário
-        5 - Cadastrar Conta
-        6 - Listar Usuários
-        7 - Listar Contas
-        8 - Sair
+    Titulo('Mensagem');
+    print('''
+    1 - Depositar
+    2 - Saque
+    3 - Extrato
+    4 - Cadastrar Usuário
+    5 - Cadastrar Conta
+    6 - Listar Usuários
+    7 - Listar Contas
+    8 - Sair
       ''');
+
+def Titulo(mensagem):
+    print(f'\n{mensagem:=^30}');
 
 saque = 0;
 deposito = 0;
@@ -100,11 +102,14 @@ while True:
         case '1':
             deposito = float(input('\nInforme o valor do depósito: '));    
             saldo, extrato = Depositar(saldo, deposito, extrato)  ;
+        
         case '2':
            saque = float(input('\nInforme o valor do saque: '));
            saldo, extrato, numero_saques = Saque(saldo=saldo, valor=saque, extrato=extrato, limite=500, numero_saques=numero_saques, limite_saques=3);
+        
         case '3':
-            Extrato(saldo, extrato=extrato);   
+            Extrato(saldo, extrato=extrato);  
+             
         case '4':
             Cadastra_usuario();
         
