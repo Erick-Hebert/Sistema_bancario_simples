@@ -49,7 +49,7 @@ def Cadastra_conta(numero_conta, agencia):
         if cpf in usuario['cpf']: 
             print(f'Sua conta é {numero_conta}');
             print(f'A agência é 0001')
-            conta = {'cpf': cpf, 'numero_conta': numero_conta, 'Agência': agencia};
+            conta = {'cpf': cpf, 'numero_conta': numero_conta, 'agencia': agencia};
             contas.append(conta);
             return numero_conta + 1;
 
@@ -57,12 +57,15 @@ def Cadastra_conta(numero_conta, agencia):
     return numero_conta
 
 def Listar_usuarios():
+    print('-'*30);
     for usuario in usuarios:
-        print(usuario);
+        print(f'Nome: {usuario['nome']}\nData de nascimento: {usuario['data_nascimento']}\nCpf: {usuario['cpf']}\nendereço: {usuario['endereco']}\n{'-'*30}');
+
 
 def Listar_contas():
+    print('-'*30);
     for conta in contas:
-        print(conta);
+        print(f'Cpf: {conta['cpf']}\nNumero de conta: {conta['numero_conta']}\nAgência: {conta['agencia']}\n{'-'*30}');
 
 def Menu():
     print('''\n
