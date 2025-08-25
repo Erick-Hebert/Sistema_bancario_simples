@@ -104,7 +104,7 @@ class Conta_Corrente(Conta):
         self._limite_saques = limite_saques
         
     def Sacar(self, valor):
-        numero_saques = len([transacao for transacao in self._historico.transacoes if transacao['tipo'] == 'Saque'])
+        numero_saques = len([transacao for transacao in self._historico.Transacoes if transacao['tipo'] == 'Saque'])
         if valor > self._limite:
            print('\nO valor excede o limite!') 
         
@@ -130,14 +130,11 @@ class Historico:
         
     
     def Adicionar_transacao(self, transacao):
-        self.transacoes.append({
+        self._transacoes.append({
             'tipo' : transacao.__class__.__name__,
             'valor' : transacao.valor,
             'data' : datetime.now().strftime('%d-%m-%Y %H:%M:%S')})
         
-    @property
-    def transacoes(self):
-        return self._transacoes
 
 class Transacao(ABC):
     
@@ -149,7 +146,7 @@ class Transacao(ABC):
     @abstractmethod
     def Registrar(self, Conta):
         ...
-    
+
 class Saque(Transacao):
     def __init__(self, valor):
         self._valor = valor
@@ -178,6 +175,43 @@ class Deposito(Transacao):
         if transacao_efetuada:
             conta.Historico.Adicionar_transacao(self)    
 
+
+class Conta_iterador:
+    def __init__(self, contas):
+        self._contas = contas
+        self._contador = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._contador < len(self._contas):
+            conta = self._contas[self._contador]
+            self._contador += 1
+            return f"\nNúmero: {conta.Numero}\
+                \nAgência: {conta.Agencia}\
+                \nCliente: {conta.Cliente}"
+        else:
+            raise StopIteration
+        
+
+
+def Log_transacao(func):
+    def Data_atual(*args, **kwargs):
+        data = datetime.now()
+        print(f'{func.__name__} às {data}')
+        return func(*args, **kwargs)
+    return Data_atual
+
+def Relatorios(conta, tipo=''):
+    for transacao in conta.Historico.Transacoes:
+        if transacao['tipo'] == "Saque" and tipo == "saque":
+            yield transacao
+        elif tipo == "deposito" and transacao['tipo'] == 'Deposito':
+            yield transacao
+        else:
+            yield transacao
+
 def Titulo(mensagem=''):
         print(f'\n{mensagem:=^30}')
     
@@ -203,7 +237,8 @@ def Buscar_conta(cliente, numero):
             return conta
     print('\nO usuário não possui a conta informada')
     return None
-         
+
+@Log_transacao         
 def Depositar(clientes):
     cpf = input('Informe o cpf do cliente: ').strip()
     cliente = Buscar_cliente(cpf, clientes)
@@ -223,7 +258,8 @@ def Depositar(clientes):
     transacao = Deposito(valor)
     
     cliente.Realizar_transacao(conta, transacao)
-    
+
+@Log_transacao      
 def Sacar(clientes):
     cpf = input('Informe o cpf do cliente: ').strip()
     cliente = Buscar_cliente(cpf, clientes)
@@ -243,7 +279,8 @@ def Sacar(clientes):
     transacao = Saque(valor)
     
     cliente.Realizar_transacao(conta, transacao)
-    
+
+@Log_transacao      
 def Extrato(clientes):
     cpf = input('Informe o cpf do cliente: ').strip()
     cliente = Buscar_cliente(cpf, clientes)
@@ -258,9 +295,10 @@ def Extrato(clientes):
     if not conta:
         return 'A conta informada não foi encontrada'
     
+    tipo = input('Informe qual tipo de extrato gostaria de ver [Saque | Deposito]: ').lower()
     Titulo('Extrato')
     
-    transacoes = conta.Historico.Transacoes
+    transacoes = Relatorios(conta, tipo)
     extrato = ''
     if not transacoes:
         print('\nNão foram realizadas transações!')
@@ -271,7 +309,8 @@ def Extrato(clientes):
     print(extrato)
     print(f'\nSaldo:\n\t{conta.Saldo:.2f}')
     Titulo()
-    
+
+@Log_transacao      
 def Criar_conta(numero, clientes, contas):
     cpf = input('Informe o cpf do cliente: ').strip()
     cliente = Buscar_cliente(cpf, clientes)
@@ -284,7 +323,8 @@ def Criar_conta(numero, clientes, contas):
     contas.append(conta)
     cliente.contas.append(conta)
     print('\nConta criada com sucesso')
-        
+
+@Log_transacao          
 def Criar_cliente(clientes):
     cpf = input('Informe o cpf do cliente: ').strip()
     cliente = Buscar_cliente(cpf, clientes)  
@@ -298,11 +338,6 @@ def Criar_cliente(clientes):
     
     cliente = Pessoa_fisica(endereco, cpf, nome, nascimento);
     clientes.append(cliente);
-    
-def Listar_contas(contas):
-    Titulo('Listagem de Contas')
-    for conta in contas:
-        print(conta)
                         
 class Main():
     clientes = []
@@ -324,7 +359,8 @@ class Main():
             case '5':
                 Criar_conta(len(contas)+1, clientes, contas)
             case '6':
-                Listar_contas(contas)    
+                for conta in Conta_iterador(contas):
+                    print(conta)   
             case '7':
                 break
                 
