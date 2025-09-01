@@ -198,9 +198,10 @@ class Conta_iterador:
 
 def Log_transacao(func):
     def Data_atual(*args, **kwargs):
-        data = datetime.now()
+        resultado = func(*args, **kwargs)
+        data = datetime.now().strftime('%d/%m/%Y %H:%M')
         print(f'{func.__name__} às {data}')
-        return func(*args, **kwargs)
+        return resultado
     return Data_atual
 
 def Relatorios(conta, tipo=''):
